@@ -1,0 +1,13 @@
+name: broadband_asset_inventory
+title: broadband_asset_inventory
+username:
+account: pravesh647
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4378394
+bundleId: 4816494
+url: https://pravesh647.shinyapps.io/broadband_asset_inventory/
+when: 1626207753.03938
+lastSyncTime: 1626207753.03939
+asMultiple: FALSE
+asStatic: FALSE
