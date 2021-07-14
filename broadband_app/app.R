@@ -7,6 +7,15 @@
 #    http://shiny.rstudio.com/
 #
 
+
+# To DO-
+# Outline of the 16 counties in the map
+# Add base layer of FCC and Microsoft connectivity
+# 
+# 
+
+
+
 library(shiny)
 library(shinydashboard)
 library(gsheet)
@@ -15,8 +24,13 @@ library(stringr)
 library(dplyr)
 
 # setwd("~/Sites/Broadband_Asset_Inventory/broadband_app")
-libdata <- readxl::read_xlsx("library_database_v2.xlsx")
-location_data <- readxl::read_xlsx("location_database.xlsx")
+# libdata <- readxl::read_xlsx("library_database_v2.xlsx")
+# location_data <- readxl::read_xlsx("location_database.xlsx")
+
+
+# Calling different RScripts
+source("forword_geocoding.R")
+
 
 # Define UI for application that draws a histogram
 
@@ -41,6 +55,13 @@ sidebar <- dashboardSidebar(
             menuSubItem("ISP", tabName = "ispmap", icon = icon("map"))
         ),
         menuItem(
+            "MapBaseLayer", 
+            tabName = "baselayer", 
+            icon = icon("globe"),
+            menuSubItem("Library", tabName = "librarymap", icon = icon("map")),
+            menuSubItem("ISP", tabName = "ispmap", icon = icon("map"))
+        ),
+        menuItem(
             "Charts", 
             tabName = "charts", 
             icon = icon("bar-chart"),
@@ -52,6 +73,7 @@ sidebar <- dashboardSidebar(
     
     
 body <- dashboardBody(
+    
     tabItems(
         tabItem(
             tabName = "librarymap",
@@ -59,7 +81,7 @@ body <- dashboardBody(
                 title = "Libraries",
                 collapsible = TRUE,
                 width = "100%",
-                height = "100%",
+                tags$style(type = "text/css", "#librarymapPlot {height: calc(100vh - 165px) !important;}"),
                 leafletOutput("librarymapPlot")
             )
         ),
@@ -77,33 +99,6 @@ body <- dashboardBody(
     
 
 ui <- dashboardPage(header, sidebar, body)
-    
-
-# 
-# ui <- fluidPage(
-# 
-#     # Application title
-#     titlePanel("Geo-Spatial Representation of Tri-state Region's Broadband Assets"),
-# 
-#     # Sidebar with a slider input for number of bins 
-#     sidebarLayout(
-#         sidebarPanel(
-#             selectInput(
-#                 inputId = "asset",
-#                 label = "Asset Selected",
-#                 choices = str_to_title(unique(libdata$asset_type)),
-#                 selected = NULL
-#             )
-#         ),
-# 
-#         # Show a plot of the generated distribution
-#         mainPanel(
-#             leafletOutput("mapPlot",  width = "100%", height = 900)
-#         )
-#     )
-# )
-
-
 
 ?left_join
 
@@ -119,7 +114,8 @@ server <- function(input, output) {
         # if ( tolower(input$asset) == 'library'){
             # selected_data %>% 
             leaflet(height = 1000) %>% 
-                addTiles() %>% 
+                # addTiles() %>% 
+                addProviderTiles(providers$Stamen.Toner) %>% 
                 addMarkers( popup = paste0("Potential Partner: ", libdata$name,
                                            "<br/>",
                                            "Director: ", libdata$director,
@@ -144,7 +140,7 @@ server <- function(input, output) {
                                            "<br/>",
                                            "Wifi Printing: ", libdata$wifi_print
                                            ),
-                            # clusterOptions = markerClusterOptions()
+                            clusterOptions = markerClusterOptions()
                             )
             
         # }

@@ -11,26 +11,26 @@ library(tidygeocoder)
 # libdata <- readxl::read_xlsx("library_database_v1.xlsx")
 libdata <- readxl::read_xlsx("library_database_v2.xlsx")
 # libdata <- gsheet::gsheet2tbl("https://docs.google.com/spreadsheets/d/12EMjsbAVGZPo92nIE2MCATfKF1iIVFWy/edit#gid=1848942392")
-location_data <- readxl::read_xlsx("location_database.xlsx")
+librarylocation_data <- readxl::read_xlsx("librarylocation_database.xlsx")
 
 
 # Checking if any new data has been added
 
-if (nrow(libdata) != nrow(location_data)) {
+if (nrow(libdata) != nrow(librarylocation_data)) {
 
-  # Forward geo coding the physical address --??tidygeocoder, ?geo ------------
-  location_data_new <- libdata[(nrow(location_data)+1):nrow(libdata),] %>% 
+  # Forward geo coding the physical address of library
+  librarylocation_data_new <- libdata[(nrow(librarylocation_data)+1):nrow(libdata),] %>% 
     mutate(address = paste0(street, ', ', city, ' ', state)) %>% 
     select(address) %>% 
     geocode(address, method = "arcgis")
 
-location_data <- rbind(location_data, location_data_new)
+librarylocation_data <- rbind(librarylocation_data, librarylocation_data_new)
   
 }
 
 # ----------------------------------------------------------------------------
 
 # exporting the data
-writexl::write_xlsx(location_data, "location_database.xlsx")
+writexl::write_xlsx(librarylocation_data, "librarylocation_database.xlsx")
 
 
