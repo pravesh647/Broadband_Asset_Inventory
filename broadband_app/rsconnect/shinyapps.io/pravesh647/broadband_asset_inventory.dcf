@@ -5,9 +5,9 @@ account: pravesh647
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4378394
-bundleId: 4819416
+bundleId: 4824332
 url: https://pravesh647.shinyapps.io/broadband_asset_inventory/
-when: 1626281310.40242
-lastSyncTime: 1626281310.40243
+when: 1626394462.23595
+lastSyncTime: 1626394462.23596
 asMultiple: FALSE
 asStatic: FALSE
