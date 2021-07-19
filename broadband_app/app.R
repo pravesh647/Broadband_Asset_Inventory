@@ -23,14 +23,17 @@ library(leaflet)
 library(stringr)
 library(dplyr)
 
-# setwd("~/Sites/Broadband_Asset_Inventory/broadband_app")
+setwd("~/Sites/Broadband_Asset_Inventory/broadband_app")
 # libdata <- readxl::read_xlsx("library_database_v2.xlsx")
 # location_data <- readxl::read_xlsx("location_database.xlsx")
 
 
 # Calling different RScripts
+# Forword Geocoding address
 source("forword_geocoding.R")
 
+# Fcc and Microsoft broadband availability and usage layer
+source("broadband_usage_layer.R")
 
 
 
@@ -133,7 +136,7 @@ body <- dashboardBody(
     )
 )
 
-ui <- dashboardPage(header, sidebar, body, skin = 'black')
+ui <- dashboardPage(header, sidebar, body, skin = 'purple')
 
 
 
@@ -194,13 +197,8 @@ server <- function(input, output) {
                                            "Wifi Printing: ", libdata$wifi_print
                                            ),
                     
-                    # clusterOptions = markerClusterOptions(),
+                   
                 ) %>% 
-                # addAwesomeMarkers(
-                #     group = "ISP",
-                #     icon = 
-                # )
-            
                 
                 # Layer Groups
                 addLayersControl(
@@ -215,6 +213,6 @@ server <- function(input, output) {
         # }
     })
 }
-?addMarkers
+
 # Run the application
 shinyApp(ui = ui, server = server)
