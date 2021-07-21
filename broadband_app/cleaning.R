@@ -5,7 +5,7 @@ library(tidygeocoder)
 
 # setwd("~/Sites/Broadband_Asset_Inventory/broadband_app")
 # Importing data to rstudio
-libdata <- readxl::read_xlsx("Regional Library Database.xlsx")
+libdata <- readxl::read_xlsx("datasets/Regional Library Database.xlsx")
 
 # Getting familiar with the dataset
 ncol(libdata)
@@ -84,7 +84,7 @@ libdata <- libdata %>%
 
 
 # exporting the data
-writexl::write_xlsx(libdata, "library_database_v1.xlsx")
+writexl::write_xlsx(libdata, "datasets/library_database_v1.xlsx")
 
 
 
