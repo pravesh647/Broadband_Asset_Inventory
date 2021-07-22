@@ -169,39 +169,39 @@ server <- function(input, output, session) {
     },
     ignoreNULL = FALSE)
     
-    layer_watcher <- reactiveVal(value = list())
+    layer_watcher <- reactiveVal(value = c())
     # Updates the layer watcher
-    observeEvent(input$layer_selection, {
-        r <- layer_watcher()
-        most_recent <- input$layer_selection
-        if(is.null(most_recent)){
-            most_recent <- 'nothing!'
-        }
-        r[[length(r) + 1]] <- most_recent
-        layer_watcher(r) # overwrite layer_watcher
-        message('Here is your history of layer selections')
-        print(layer_watcher())
-    },
-    ignoreNULL = FALSE)
+    # observeEvent(input$layer_selection, {
+    #     r <- layer_watcher()
+    #     most_recent <- input$layer_selection
+    #     if(is.null(most_recent)){
+    #         most_recent <- 'nothing!'
+    #     }
+    #     r[[length(r) + 1]] <- most_recent
+    #     layer_watcher(r) # overwrite layer_watcher
+    #     message('Here is your history of layer selections')
+    #     print(layer_watcher())
+    # },
+    # ignoreNULL = FALSE)
     
     observeEvent(input$layer_selection,{
         
         selected_layer <- input$layer_selection
-        message('---pravesh: current selected layer is: ', selected_layer)
+        # message('---pravesh: current selected layer is: ', selected_layer)
         r <- layer_watcher()
-        if(length(r) > 1){
-            # get the penultimate layer selection
-            old_layer <- r[[length(r)-1]]
-        } else {
-            old_layer <- c()
-        }
-        message('---pravesh: previously selected layer is: ', old_layer)
-        # see if something was already in
-        fcc_already <- "Broadband Availability (FCC)" %in% selected_layer &
-            "Broadband Availability (FCC)" %in% old_layer
-        if(fcc_already){
-            message('---pravesh: do NOT add the polygons for fcc again, it is already drawn!')
-        }
+        # if(length(r) > 1){
+        #     # get the penultimate layer selection
+        #     old_layer <- r[[length(r)-1]]
+        # } else {
+        #     old_layer <- c()
+        # }
+        # message('---pravesh: previously selected layer is: ', old_layer)
+        # # see if something was already in
+        # fcc_already <- "Broadband Availability (FCC)" %in% selected_layer &
+        #     "Broadband Availability (FCC)" %in% old_layer
+        # if(fcc_already){
+        #     message('---pravesh: do NOT add the polygons for fcc again, it is already drawn!')
+        # }
         
         # save(selected_layer, file = '/tmp/prav.RData')
         
@@ -213,11 +213,11 @@ server <- function(input, output, session) {
             leafletProxy("map", data = zipcode_shp) %>%
                 clearShapes() %>% 
                 removeControl(layerId = 'microsoft_legend_control')
-            
+            r <- c()
         }else{
             # Broadband Availability (FCC) Layer
             # str(county_shp@data)
-            if("Broadband Availability (FCC)" %in% selected_layer & !fcc_already){
+            if("Broadband Availability (FCC)" %in% selected_layer & !"Broadband Availability (FCC)" %in% r ){
                 county_shp@data$fcc_broadband <- as.numeric(county_shp@data$fcc_broadband)
                 fcc_map_palette <- colorNumeric(palette = brewer.pal(5, "Reds"),
                                             domain=county_shp@data$fcc_broadband,
@@ -237,8 +237,20 @@ server <- function(input, output, session) {
                                                                   'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%')
 
                     )
-                
+                r <- c(r, "Broadband Availability (FCC)")
             }
+            else{
+                if (!"Broadband Availability (FCC)" %in% selected_layer){
+                    
+                    leafletProxy("map", data = county_shp) %>%
+                        clearGroup(group = 'fcc_layer') %>%
+                        removeControl(layerId = 'fcc_legend_control')
+                    r <- r[! r %in% c("Broadband Availability (FCC)")]
+                }
+            }
+            
+            
+            
             
             # if("Broadband Availability (FCC)" %in% selected_layer){
             #     
@@ -282,7 +294,7 @@ server <- function(input, output, session) {
            # a new if-else for a new layer goes here
             
             # Broadband Usage (Microsoft) Layer
-            if("Broadband Usage (Microsoft)" %in% selected_layer){
+            if("Broadband Usage (Microsoft)" %in% selected_layer & !"Broadband Usage (Microsoft)" %in% r){
                 
                 map_palette <- colorNumeric(palette = brewer.pal(9, "Greens"),
                                             domain=zipcode_shp@data$broadband_usage,
@@ -313,17 +325,22 @@ server <- function(input, output, session) {
                         position = "bottomleft",
                         na.label = "NA" )
                 
+                r <- c(r, "Broadband Usage (Microsoft)")
                 
             }else{
-                leafletProxy("map", data = zipcode_shp) %>%
-                    clearGroup(group = 'microsoft_layer') %>%
-                    removeControl(layerId = 'microsoft_legend_control')
+                if (!"Broadband Usage (Microsoft)" %in% selected_layer ){
+                    leafletProxy("map", data = zipcode_shp) %>%
+                        clearGroup(group = 'microsoft_layer') %>%
+                        removeControl(layerId = 'microsoft_legend_control')
+                    
+                    r <- r[! r %in% c("Broadband Usage (Microsoft)")]
+                }
             }
             # a new if-else for a new layer goes here
             
         }
         
-        
+        layer_watcher(r) # overwrite layer_watcher
         
     },
     ignoreNULL = FALSE)
