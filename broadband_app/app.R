@@ -1,18 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-.
-
-# To DO-
-# Outline of the 16 counties in the map
-# Add base layer of FCC and Microsoft connectivity
-# Add green and red color functionality in library map
-# 
 
 
 
@@ -184,19 +169,120 @@ server <- function(input, output, session) {
     },
     ignoreNULL = FALSE)
     
-?clearMarkers
+    layer_watcher <- reactiveVal(value = list())
+    # Updates the layer watcher
+    observeEvent(input$layer_selection, {
+        r <- layer_watcher()
+        most_recent <- input$layer_selection
+        if(is.null(most_recent)){
+            most_recent <- 'nothing!'
+        }
+        r[[length(r) + 1]] <- most_recent
+        layer_watcher(r) # overwrite layer_watcher
+        message('Here is your history of layer selections')
+        print(layer_watcher())
+    },
+    ignoreNULL = FALSE)
+    
     observeEvent(input$layer_selection,{
         
         selected_layer <- input$layer_selection
+        message('---pravesh: current selected layer is: ', selected_layer)
+        r <- layer_watcher()
+        if(length(r) > 1){
+            # get the penultimate layer selection
+            old_layer <- r[[length(r)-1]]
+        } else {
+            old_layer <- c()
+        }
+        message('---pravesh: previously selected layer is: ', old_layer)
+        # see if something was already in
+        fcc_already <- "Broadband Availability (FCC)" %in% selected_layer &
+            "Broadband Availability (FCC)" %in% old_layer
+        if(fcc_already){
+            message('---pravesh: do NOT add the polygons for fcc again, it is already drawn!')
+        }
+        
+        # save(selected_layer, file = '/tmp/prav.RData')
         
         if(is.null(selected_layer)){
+            leafletProxy("map", data = county_shp) %>%
+                clearShapes() %>% 
+                removeControl(layerId = 'fcc_legend_control')
+            
             leafletProxy("map", data = zipcode_shp) %>%
                 clearShapes() %>% 
-                removeControl(layerId = 'legend_control')
+                removeControl(layerId = 'microsoft_legend_control')
             
         }else{
+            # Broadband Availability (FCC) Layer
+            # str(county_shp@data)
+            if("Broadband Availability (FCC)" %in% selected_layer & !fcc_already){
+                county_shp@data$fcc_broadband <- as.numeric(county_shp@data$fcc_broadband)
+                fcc_map_palette <- colorNumeric(palette = brewer.pal(5, "Reds"),
+                                            domain=county_shp@data$fcc_broadband,
+                                            na.color="#CECECE")
+                
+                leafletProxy("map", data = county_shp) %>% 
+                    addPolygons(
+                        group = "fcc_layer",
+                        fillColor = ~fcc_map_palette(county_shp@data$fcc_broadband),
+                        dashArray = '5,5',
+                        weight = 3,
+                        color = "black",
+                        label = paste0(county_shp@data$county_name , " ", county_shp@data$st,
+                                                                  "<br/>",
+                                                                  # county_shp@data$GEOID10,
+                                                                  "<br/>",
+                                                                  'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%')
+
+                    )
+                
+            }
             
-            if("Broadband Availability (FCC)" %in% selected_layer){
+            # if("Broadband Availability (FCC)" %in% selected_layer){
+            #     
+            #     # map_palette <- colorNumeric(palette = brewer.pal(9, "Reds"),
+            #     #                             domain=county_shp@data$fcc_broadband,
+            #     #                             na.color="#CECECE")
+            #     
+            #     leafletProxy("map", data = county_shp) %>%
+            #         addPolygons(
+            #             group = "fcc_layer",
+            #             # fillColor = ~map_palette(fcc_broadband),
+            #             # fillOpacity = 0.7,
+            #             dashArray = '5,5',
+            #             # dashOffset = '10',
+            #             color = "black",
+            #             weight = 4,
+            #             label = paste0(county_shp@data$county_name , " ", county_shp@data$st,
+            #                            "<br/>",
+            #                            # county_shp@data$GEOID10,
+            #                            "<br/>",
+            #                            'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%')
+            #             
+            #             
+            #             ) %>%
+            #         addLegend(
+            #             layerId = "fcc_legend_control",
+            #             pal=map_palette,
+            #             values=county_shp$fcc_broadband,
+            #             opacity=0.5,
+            #             position = "bottomleft",
+            #             na.label = "NA" )
+            #     
+            #     
+            # }else{
+            #     leafletProxy("map", data = county_shp) %>%
+            #         clearGroup(group = 'fcc_layer') %>%
+            #         removeControl(layerId = 'fcc_legend_control')
+            # }
+            
+
+           # a new if-else for a new layer goes here
+            
+            # Broadband Usage (Microsoft) Layer
+            if("Broadband Usage (Microsoft)" %in% selected_layer){
                 
                 map_palette <- colorNumeric(palette = brewer.pal(9, "Greens"),
                                             domain=zipcode_shp@data$broadband_usage,
@@ -204,7 +290,7 @@ server <- function(input, output, session) {
                 
                 leafletProxy("map", data = zipcode_shp) %>%
                     addPolygons(
-                        group = "fcc_layer",
+                        group = "microsoft_layer",
                         fillColor = ~map_palette(broadband_usage),
                         fillOpacity = 0.7,
                         dashArray = '5,5',
@@ -215,12 +301,12 @@ server <- function(input, output, session) {
                                        "<br/>",
                                        zipcode_shp@data$GEOID10,
                                        "<br/>",
-                                       'Broadband Usage: ', zipcode_shp@data$broadband_usage*100, '%'),
+                                       'Broadband Usage: ', zipcode_shp@data$broadband_usage*100, '%')
                         
                         
                         ) %>%
                     addLegend( 
-                        layerId = "legend_control",
+                        layerId = "microsoft_legend_control",
                         pal=map_palette,
                         values=zipcode_shp$broadband_usage,
                         opacity=0.5,
@@ -230,8 +316,8 @@ server <- function(input, output, session) {
                 
             }else{
                 leafletProxy("map", data = zipcode_shp) %>%
-                    clearGroup(group = 'fcc_layer') %>%
-                    removeControl(layerId = 'legend_control')
+                    clearGroup(group = 'microsoft_layer') %>%
+                    removeControl(layerId = 'microsoft_legend_control')
             }
             # a new if-else for a new layer goes here
             
@@ -243,15 +329,6 @@ server <- function(input, output, session) {
     ignoreNULL = FALSE)
 
 
-    observe({
-
-
-
-    })
-    
-    
-    
-    
 }
 
 # Run the application
