@@ -44,12 +44,6 @@ ui <- bootstrapPage(
              )
     ),
     
-    # <div class="container" onclick="myFunction(this)">
-    #     <div class="bar1"></div>
-    #     <div class="bar2"></div>
-    #     <div class="bar3"></div>
-    #     </div>
-    
     absolutePanel(id = "input-panel",
                   fixed = TRUE,
                   draggable = TRUE,
@@ -67,6 +61,7 @@ ui <- bootstrapPage(
                       choices = c("Library",
                                   "ISP"
                       ),
+                      selected = "Library"
                   ),
                   
                   selectInput(
@@ -157,17 +152,19 @@ server <- function(input, output, session) {
                     addAwesomeMarkers(
                         group = "library_markers",
                         icon = library_marker_icon,
-                        popup = paste0("Potential Partner: ", libdata$name,
+                        popup = paste0("<b>Potential Partner: </b>", libdata$name,
                                        "<br/>",
-                                       "Director: ", libdata$director,
+                                       "<b>Director: </b>", libdata$director,
                                        "<br/>",
-                                       "Email: ", libdata$email,
+                                       "<b>Address: </b>", libdata$street, " ", libdata$city, " ", libdata$county, " ", libdata$state,
                                        "<br/>",
-                                       "Phone Number: ", libdata$phoneNo,
+                                       "<a href =\"mailto:", libdata$email, "\", target=\"_blank\">Email: </a>", libdata$email,
                                        "<br/>",
-                                       "Address: ", libdata$street, " ", libdata$city, " ", libdata$county, " ", libdata$state,
+                                       "<a href =\"tel:", libdata$phoneNo, "\", target=\"_blank\">Call: </a>", libdata$phoneNo,
                                        "<br/>",
-                                       "BroadBand Information: ",
+                                       "<a href =\"", libdata$link, "\", target=\"_blank\">Website</a>",
+                                       "<br/>",
+                                       "<b><u>BroadBand Information: </u></b>",
                                        "<br/>",
                                        "Internet Access: ", libdata$internet_acc,
                                        "<br/>",

@@ -15,19 +15,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* responsive for mobile*/
 @media screen and (max-width: 600px) {
   #input-panel{
@@ -47,8 +34,8 @@
     cursor: pointer;
     position: fixed;
     top: 4%;
-    left: 50%;
-    transform: translate(-50%, -60%);
+    left: 40%;
+
     z-index: 1;
   }
   
