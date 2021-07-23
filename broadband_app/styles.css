@@ -15,10 +15,10 @@
 
 
 
+
 /* responsive for mobile*/
 @media screen and (max-width: 600px) {
   #input-panel{
-    /* background-color: black;*/
     top: 0% !important;
     right: 50% !important;
     display: none;
@@ -27,7 +27,7 @@
     padding: 50px 20px 20px 60px;
   }
   
-  /* Adding menu to absolute panel*/
+  /* Adding hamburger-menu to absolute panel*/
   
   .container {
     display: inline-block;
@@ -36,7 +36,7 @@
     top: 4%;
     left: 40%;
 
-    z-index: 1;
+    z-index: 2;
   }
   
   .bar1, .bar2, .bar3 {
