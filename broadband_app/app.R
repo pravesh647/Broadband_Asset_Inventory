@@ -1,6 +1,4 @@
 
-
-
 library(shiny)
 library(shinydashboard)
 library(leaflet)
@@ -9,11 +7,6 @@ library(dplyr)
 library(sp)
 library(readr)
 library(RColorBrewer)
-
-# setwd("~/Sites/Broadband_Asset_Inventory/broadband_app")
-# libdata <- readxl::read_xlsx("library_database_v2.xlsx")
-# location_data <- readxl::read_xlsx("location_database.xlsx")
-
 
 # Calling different RScripts
 source("forword_geocoding.R")
@@ -24,18 +17,15 @@ source('broadband_usage_layer.R')
 ui <- bootstrapPage(
     title = "BAI Map",
     tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+    # Attach CSS and JS files
     tags$head(
         # Include custom CSS
         includeCSS("styles.css"),
         includeScript("styles.js")
     ),
     leafletOutput("map", width = "100%", height = "100%"),
-    # tags$div(
-    #     HTML("<img src="">
-    #          
-    #          ")
-    # )
     
+    # Creates the hamburger menu
     tags$div(class="container", onClick="myFunction(this)",
              list(
                  tags$div(class="bar1"),
@@ -44,49 +34,49 @@ ui <- bootstrapPage(
              )
     ),
     
-    absolutePanel(id = "input-panel",
-                  fixed = TRUE,
-                  draggable = TRUE,
-                  top = 150,
-                  left = "auto",
-                  right = 20,
-                  bottom = "auto",
-                  width = 330,
-                  height = "auto",
-                  
-                  
-                  checkboxGroupInput(
-                      inputId = "asset_selection",
-                      label = "Broadband Assets",
-                      choices = c("Library",
-                                  "ISP"
-                      ),
-                      selected = "Library"
-                  ),
-                  
-                  selectInput(
-                      inputId = "library_resources",
-                      label = "Library Resources Availability",
-                      choices = c("Internet Access" = "internet_acc",
-                                  "Wifi Access" = "wifi_acc",
-                                  "Computer Classes" = "computer_classes",
-                                  "Laptop Lending" = "lend_laptop",
-                                  "EReader Lending" = "lend_ereader",
-                                  "Wifi Printing" = "wifi_print"),
-                      
-                  ),
-                  
-                  checkboxGroupInput(
-                      inputId = "layer_selection",
-                      label = "Broadband Availability and Usage",
-                      choices = c("Broadband Availability (FCC)",
-                                  "Broadband Usage (Microsoft)"
-                      ),
-                  ),
-                  
-                  
-                  
-                  # checkboxInput("legend", "Show legend", TRUE)
+    # Input panel 
+    absolutePanel(
+        id = "input-panel",
+        fixed = TRUE,
+        draggable = TRUE,
+        top = 150,
+        left = "auto",
+        right = 20,
+        bottom = "auto",
+        width = 330,
+        height = "auto",
+        
+        
+        checkboxGroupInput(
+            inputId = "asset_selection",
+            label = "Broadband Assets",
+            choices = c("Library",
+                        "ISP"
+            ),
+            selected = "Library"
+        ),
+        
+        selectInput(
+            inputId = "library_resources",
+            label = "Library Resources Availability",
+            choices = c("Internet Access" = "internet_acc",
+                        "Wifi Access" = "wifi_acc",
+                        "Computer Classes" = "computer_classes",
+                        "Laptop Lending" = "lend_laptop",
+                        "EReader Lending" = "lend_ereader",
+                        "Wifi Printing" = "wifi_print"),
+            
+        ),
+        
+        checkboxGroupInput(
+            inputId = "layer_selection",
+            label = "Broadband Availability and Usage",
+            choices = c("Broadband Availability (FCC)",
+                        "Broadband Usage (Microsoft)"
+            ),
+            
+        ),
+
     )
     
 )
@@ -223,17 +213,15 @@ server <- function(input, output, session) {
                         
                         group = "fcc_layer",
                         fillColor = ~fcc_map_palette(county_shp@data$fcc_broadband),
+                        fillOpacity = 0.6,
                         dashArray = '5,5',
                         weight = 3,
                         color = "black",
-                        label = paste0(county_shp@data$county_name , " ", county_shp@data$st,
-                                      "<br/>",
-                                      "<br/>",
+                        label = paste0(county_shp@data$county_name , ", ", county_shp@data$st,
+                                      " | ",
                                       'Broadband Availability: ', county_shp@data$fcc_broadband*100, '%'
                                        ),
                         options = pathOptions(pane = "fcc_pane")
-                        # options = pathOptions(pane)
-                        
                         
                     ) %>% 
                 addLegend( 
@@ -255,55 +243,13 @@ server <- function(input, output, session) {
                     r <- r[! r %in% c("Broadband Availability (FCC)")]
                 }
             }
-            
-            # ?brewer.pal
-            
-            
-            # if("Broadband Availability (FCC)" %in% selected_layer){
-            #     
-            #     # map_palette <- colorNumeric(palette = brewer.pal(9, "Reds"),
-            #     #                             domain=county_shp@data$fcc_broadband,
-            #     #                             na.color="#CECECE")
-            #     
-            #     leafletProxy("map", data = county_shp) %>%
-            #         addPolygons(
-            #             group = "fcc_layer",
-            #             # fillColor = ~map_palette(fcc_broadband),
-            #             # fillOpacity = 0.7,
-            #             dashArray = '5,5',
-            #             # dashOffset = '10',
-            #             color = "black",
-            #             weight = 4,
-            #             label = paste0(county_shp@data$county_name , " ", county_shp@data$st,
-            #                            "<br/>",
-            #                            # county_shp@data$GEOID10,
-            #                            "<br/>",
-            #                            'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%')
-            #             
-            #             
-            #             ) %>%
-            #         addLegend(
-            #             layerId = "fcc_legend_control",
-            #             pal=map_palette,
-            #             values=county_shp$fcc_broadband,
-            #             opacity=0.5,
-            #             position = "bottomleft",
-            #             na.label = "NA" )
-            #     
-            #     
-            # }else{
-            #     leafletProxy("map", data = county_shp) %>%
-            #         clearGroup(group = 'fcc_layer') %>%
-            #         removeControl(layerId = 'fcc_legend_control')
-            # }
-            
 
            # a new if-else for a new layer goes here
             
             # Broadband Usage (Microsoft) Layer
             if("Broadband Usage (Microsoft)" %in% selected_layer & !"Broadband Usage (Microsoft)" %in% r){
                 
-                map_palette <- colorNumeric(palette = brewer.pal(9, "Greens"),
+                map_palette <- colorNumeric(palette = brewer.pal(9, "Purples"),
                                             domain=zipcode_shp@data$broadband_usage,
                                             na.color="#CECECE")
                 
@@ -316,11 +262,8 @@ server <- function(input, output, session) {
                         # dashOffset = '10',
                         color = "black",
                         weight = 2,
-                        label = paste0(zipcode_shp@data$county_name , " County, ",
-                                       "<br/>",
-                                       zipcode_shp@data$GEOID10,
-                                       "<br/>",
-                                       'Broadband Usage: ', zipcode_shp@data$broadband_usage*100, '%'),
+                        label = paste0(zipcode_shp@data$county_name , " County, ", zipcode_shp@data$ZCTA5CE10,
+                                       " | ", 'Broadband Usage: ', zipcode_shp@data$broadband_usage*100, '%'),
                         options = pathOptions(pane = "microsoft_pane")
                         
                         
