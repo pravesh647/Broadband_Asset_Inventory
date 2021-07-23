@@ -50,8 +50,7 @@ ui <- bootstrapPage(
         checkboxGroupInput(
             inputId = "asset_selection",
             label = "Broadband Assets",
-            choices = c("Library",
-                        "ISP"
+            choices = c("Library"
             ),
             selected = "Library"
         ),
