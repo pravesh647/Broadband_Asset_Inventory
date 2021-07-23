@@ -26,9 +26,30 @@ ui <- bootstrapPage(
     tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
     tags$head(
         # Include custom CSS
-        includeCSS("styles.css")
+        includeCSS("styles.css"),
+        includeScript("styles.js")
     ),
     leafletOutput("map", width = "100%", height = "100%"),
+    # tags$div(
+    #     HTML("<img src="">
+    #          
+    #          ")
+    # )
+    
+    tags$div(class="container", onClick="myFunction(this)",
+             list(
+                 tags$div(class="bar1"),
+                 tags$div(class="bar2"),
+                 tags$div(class="bar3")
+             )
+    ),
+    
+    # <div class="container" onclick="myFunction(this)">
+    #     <div class="bar1"></div>
+    #     <div class="bar2"></div>
+    #     <div class="bar3"></div>
+    #     </div>
+    
     absolutePanel(id = "input-panel",
                   fixed = TRUE,
                   draggable = TRUE,
@@ -38,6 +59,15 @@ ui <- bootstrapPage(
                   bottom = "auto",
                   width = 330,
                   height = "auto",
+                  
+                  
+                  checkboxGroupInput(
+                      inputId = "asset_selection",
+                      label = "Broadband Assets",
+                      choices = c("Library",
+                                  "ISP"
+                      ),
+                  ),
                   
                   selectInput(
                       inputId = "library_resources",
@@ -50,13 +80,6 @@ ui <- bootstrapPage(
                                   "Wifi Printing" = "wifi_print"),
                       
                   ),
-                  checkboxGroupInput(
-                      inputId = "asset_selection",
-                      label = "Broadband Assets",
-                      choices = c("Library",
-                                  "ISP"
-                      ),
-                  ),
                   
                   checkboxGroupInput(
                       inputId = "layer_selection",
@@ -68,7 +91,7 @@ ui <- bootstrapPage(
                   
                   
                   
-                  checkboxInput("legend", "Show legend", TRUE)
+                  # checkboxInput("legend", "Show legend", TRUE)
     )
     
 )
@@ -234,8 +257,10 @@ server <- function(input, output, session) {
                                                                   "<br/>",
                                                                   # county_shp@data$GEOID10,
                                                                   "<br/>",
-                                                                  'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%')
-
+                                                                  'Broadband Usage: ', county_shp@data$fcc_broadband*100, '%'),
+                        # options = pathOptions(pane)
+                        
+# ?pathOptions
                     )
                 r <- c(r, "Broadband Availability (FCC)")
             }
